@@ -20,9 +20,9 @@ namespace TraySafe
         public MainForm()
         {
             InitializeComponent();
-            if (File.Exists("text.txt"))
+            if (File.Exists("data.txt"))
             {
-                var Lines = File.ReadAllLines("text.txt");
+                var Lines = File.ReadAllLines("data.txt");
 
                 var itemTexts = Lines.Where((c, i) => i % 2 == 0).ToList();
                 var itemValues = Lines.Where((c, i) => i % 2 != 0).ToList();
@@ -89,13 +89,13 @@ namespace TraySafe
 
                 string itemValues = textBox2.Text;
 
-                if (!File.Exists("text.txt"))
+                if (!File.Exists("data.txt"))
                 {
                     AddItemsToContextMenu(item, separator);
                 }
                 else
                 {
-                    var Lines = File.ReadAllLines("text.txt");
+                    var Lines = File.ReadAllLines("data.txt");
                     if (!Lines.Contains(item.Text) && !Lines.Contains(textBox2.Text))
                     {
                         AddItemsToContextMenu(item, separator);
@@ -147,7 +147,7 @@ namespace TraySafe
         #region Helper Methods
         private void AddItemsToContextMenu(ToolStripMenuItem item, ToolStripSeparator separator)
         {
-            StreamWriter writer = new StreamWriter("text.txt", true);
+            StreamWriter writer = new StreamWriter("data.txt", true);
             writer.WriteLine(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1));
             writer.WriteLine(textBox2.Text);
             writer.Close();

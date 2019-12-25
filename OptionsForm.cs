@@ -22,11 +22,11 @@ namespace TraySafe
         {
             MainForm._contextMenuStrip.Items.Remove(MainForm._stripMenuItem);
             MainForm._contextMenuStrip.Items.Remove(MainForm._separator);
-            var Lines = File.ReadAllLines("text.txt");
+            var Lines = File.ReadAllLines("data.txt");
             if (Lines.Contains(MainForm._stripMenuItem.Text))
             {
                 var newLines = Lines.Where(line => !line.Contains(MainForm._stripMenuItem.Text) && !line.Contains(MainForm._iValues));
-                File.WriteAllLines("text.txt", newLines);
+                File.WriteAllLines("data.txt", newLines);
                 this.Hide();
             }
             else
