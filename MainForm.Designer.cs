@@ -46,8 +46,6 @@ namespace TraySafe
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.addButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,6 +53,10 @@ namespace TraySafe
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.infoLabel = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.addButton = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -66,33 +68,15 @@ namespace TraySafe
             this.textBox1.TabIndex = 0;
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox1_KeyPress);
             // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(60, 57);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(320, 20);
-            this.textBox2.TabIndex = 1;
-            this.textBox2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox2_KeyPress);
-            // 
-            // addButton
-            // 
-            this.addButton.Location = new System.Drawing.Point(263, 14);
-            this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(118, 37);
-            this.addButton.TabIndex = 2;
-            this.addButton.Text = "Add";
-            this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.addButton_Click);
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F);
             this.label1.Location = new System.Drawing.Point(11, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(45, 17);
+            this.label1.Size = new System.Drawing.Size(43, 17);
             this.label1.TabIndex = 3;
-            this.label1.Text = "Name";
+            this.label1.Text = "Label";
             // 
             // contextMenuStrip1
             // 
@@ -120,14 +104,14 @@ namespace TraySafe
             // 
             this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Text = "TraySafe";
             this.notifyIcon1.Visible = true;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F);
-            this.label2.Location = new System.Drawing.Point(11, 57);
+            this.label2.Location = new System.Drawing.Point(11, 83);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(38, 17);
             this.label2.TabIndex = 4;
@@ -141,17 +125,53 @@ namespace TraySafe
             this.infoLabel.Size = new System.Drawing.Size(0, 13);
             this.infoLabel.TabIndex = 5;
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F);
+            this.label3.Location = new System.Drawing.Point(11, 57);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(45, 17);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "Name";
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(60, 57);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(320, 20);
+            this.textBox2.TabIndex = 7;
+            // 
+            // textBox3
+            // 
+            this.textBox3.Location = new System.Drawing.Point(60, 83);
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(320, 20);
+            this.textBox3.TabIndex = 8;
+            // 
+            // addButton
+            // 
+            this.addButton.Location = new System.Drawing.Point(262, 14);
+            this.addButton.Name = "addButton";
+            this.addButton.Size = new System.Drawing.Size(118, 38);
+            this.addButton.TabIndex = 9;
+            this.addButton.Text = "Add";
+            this.addButton.UseVisualStyleBackColor = true;
+            this.addButton.Click += new System.EventHandler(this.addButton_Click);
+            // 
             // MainForm
             // 
             this.AcceptButton = this.addButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(392, 88);
+            this.ClientSize = new System.Drawing.Size(392, 116);
+            this.Controls.Add(this.addButton);
+            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.infoLabel);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.addButton);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -159,6 +179,7 @@ namespace TraySafe
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TraySafe";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.Click += new System.EventHandler(this.addButton_Click);
             this.Move += new System.EventHandler(this.MainForm_Move);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -168,9 +189,11 @@ namespace TraySafe
 
         #endregion
 
-        public System.Windows.Forms.TextBox textBox1;
-        public System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Button addButton;
+        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;

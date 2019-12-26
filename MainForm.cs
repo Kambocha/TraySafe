@@ -16,27 +16,7 @@ namespace TraySafe
         public MainForm()
         {
             InitializeComponent();
-            if (File.Exists("data.txt"))
-            {
-                var Lines = File.ReadAllLines("data.txt");
-
-                var itemTexts = Lines.Where((c, i) => i % 2 == 0).ToList();
-                var itemValues = Lines.Where((c, i) => i % 2 != 0).ToList();
-
-                var mergedLists = itemTexts.Select((k, idx) => new { k, idx })
-                                           .GroupBy(x => x.k)
-                                           .ToDictionary(g => g.Key.First().ToString().ToUpper() + g.Key.Substring(1), g => g.Select(c => itemValues[c.idx]).Single());
-
-                foreach (var pair in mergedLists)
-                {
-                    ToolStripMenuItem tool = new ToolStripMenuItem();
-                    ToolStripSeparator separator = new ToolStripSeparator();
-                    tool.Text = pair.Key;
-                    contextMenuStrip1.Items.Insert(0, tool);
-                    contextMenuStrip1.Items.Insert(1, separator);
-                    tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, pair.Value); };
-                }
-            }
+            LoadDataWhenAppIsLoaded();
         }
 
         private void AddToolStripMenuItem_MouseDown(object sender, MouseEventArgs e)
@@ -45,6 +25,7 @@ namespace TraySafe
             {
                 textBox1.Clear();
                 textBox2.Clear();
+                textBox3.Clear();
                 infoLabel.Text = "";
                 this.Show();
                 this.WindowState = FormWindowState.Normal;
@@ -55,6 +36,7 @@ namespace TraySafe
         {
             if (e.Button == MouseButtons.Left)
             {
+                notifyIcon1.Visible = false;
                 Application.Exit();
             }
         }
@@ -69,12 +51,13 @@ namespace TraySafe
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            notifyIcon1.Visible = false;
             Application.ExitThread();
         }
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(textBox1.Text) && !string.IsNullOrWhiteSpace(textBox2.Text))
+            if (!string.IsNullOrWhiteSpace(textBox1.Text) && !string.IsNullOrWhiteSpace(textBox2.Text) && !string.IsNullOrWhiteSpace(textBox3.Text))
             {
                 ToolStripSeparator separator = new ToolStripSeparator();
                 ToolStripMenuItem item = new ToolStripMenuItem()
@@ -83,42 +66,47 @@ namespace TraySafe
                     Tag = "menuItem"
                 };
 
-                string itemValues = textBox2.Text;
+                string itemName = textBox2.Text;
+                string itemData = textBox3.Text;
 
-                if (!File.Exists("data.txt"))
+
+                if (!File.Exists("labels.trs") && !File.Exists("data.trs"))
                 {
-                    AddItemsToContextMenu(item, separator);
+                    AddItemsToContextMenuAndStorage(item, separator);
                 }
-                else
+                else if(File.Exists("labels.trs") && File.Exists("data.trs")) 
                 {
-                    var Lines = File.ReadAllLines("data.txt");
-                    if (!Lines.Contains(item.Text) && !Lines.Contains(textBox2.Text))
+                    var labels = File.ReadAllText("labels.trs");
+
+                    if (!labels.Contains(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1)))
                     {
-                        AddItemsToContextMenu(item, separator);
-                    }
-                    else if (Lines.Contains(item.Text))
-                    {
-                        infoLabel.Text = "Field with same name exists";
-                    }
-                    else if (Lines.Contains(textBox2.Text))
-                    {
-                        infoLabel.Text = "Field with same data exists";
+                        AddItemsToContextMenuAndStorage(item, separator);
                     }
                     else
                     {
-                        infoLabel.Text = "Unknown Error!";
+                        infoLabel.Text = "Field with same label already exists";
                     }
                 }
+                else
+                {
+                    MessageBox.Show("One of two storage files is missing!");
+                }
 
-                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemValues); };
-                
+                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };                
             }
         }
-        private void item_MouseDown(object senders, MouseEventArgs a, ToolStripMenuItem item, ToolStripSeparator separator, string itemValues)
+
+        private void item_MouseDown(object senders, MouseEventArgs a, ToolStripMenuItem item, ToolStripSeparator separator, string itemName, string itemData)
         {
             if (a.Button == MouseButtons.Left)
             {
-                Clipboard.SetText(itemValues);
+                Clipboard.SetText(itemName);
+                notifyIcon1.ShowBalloonTip(1000, string.Empty, "Copied name", ToolTipIcon.None);
+            }
+            else if (a.Button == MouseButtons.Right)
+            {
+                Clipboard.SetText(itemData);
+                notifyIcon1.ShowBalloonTip(1000, string.Empty, "Copied data", ToolTipIcon.None);
             }
             else if (a.Button == MouseButtons.Middle)
             {
@@ -127,11 +115,25 @@ namespace TraySafe
                 {
                     contextMenuStrip1.Items.Remove(item);
                     contextMenuStrip1.Items.Remove(separator);
-                    var Lines = File.ReadAllLines("data.txt");
-                    if (Lines.Contains(item.Text))
+                    var data = File.ReadAllLines("data.trs");
+                    var labels = File.ReadAllLines("labels.trs");
+
+                    List<string> dataList = new List<string>();
+                    dataList.AddRange(data);
+
+                    List<string> labelsList = new List<string>();
+                    labelsList.AddRange(labels);
+
+                    if (data.Contains(itemName))
                     {
-                        var newLines = Lines.Where(line => !line.Contains(item.Text) && !line.Contains(itemValues));
-                        File.WriteAllLines("data.txt", newLines);
+                        if (labels.Contains(item.Text))
+                        {
+                            labelsList.Remove(item.Text);
+                            File.WriteAllLines("labels.trs", labelsList);
+                        }
+                        dataList.Remove(itemName);
+                        dataList.Remove(itemData);
+                        File.WriteAllLines("data.trs", dataList);
                         this.Hide();
                     }
                     else
@@ -142,6 +144,7 @@ namespace TraySafe
                 }
                 else if (dialogResult == DialogResult.No)
                 {
+                    contextMenuStrip1.Hide();
                     return;
                 }
             }
@@ -158,12 +161,74 @@ namespace TraySafe
         }
 
         #region Helper Methods
-        private void AddItemsToContextMenu(ToolStripMenuItem item, ToolStripSeparator separator)
+
+        private void LoadDataWhenAppIsLoaded()
         {
-            StreamWriter writer = new StreamWriter("data.txt", true);
-            writer.WriteLine(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1));
-            writer.WriteLine(textBox2.Text);
-            writer.Close();
+            if (File.Exists("data.trs") && File.Exists("labels.trs"))
+            {
+                var data = File.ReadAllLines("data.trs");
+                var labels = File.ReadAllLines("labels.trs");
+
+                try
+                {
+                    var itemNames = data.Where((c, i) => i % 2 == 0).ToList();
+                    var itemData = data.Where((c, i) => i % 2 != 0).ToList();
+                    var itemLabels = labels.ToList();
+
+                    int counter = 0;
+
+                    foreach (var item in itemLabels)
+                    {
+                        ToolStripMenuItem tool = new ToolStripMenuItem();
+                        ToolStripSeparator separator = new ToolStripSeparator();
+                        tool.Text = itemLabels[counter];
+                        contextMenuStrip1.Items.Insert(0, tool);
+                        contextMenuStrip1.Items.Insert(1, separator);
+
+                        string innerName = itemNames[counter].First().ToString().ToLower() + itemNames[counter].Substring(1);
+                        string innerData = itemData[counter];
+
+                        tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, innerName, innerData); };
+                        counter++;
+                    }
+
+                    //var mergedLists = itemNames.Select((k, idx) => new { k, idx })
+                    //                      .GroupBy(x => x.k)
+                    //                      .ToDictionary(g => g.Key.First().ToString().ToUpper() + g.Key.Substring(1), g => g.Select(c => itemData[c.idx]).Single());
+
+
+                    #region semi-working method
+                    //int t;
+                    //for (t = 0; t < itemLabels.Count; t++)
+                    //{
+                    //    ToolStripMenuItem tool = new ToolStripMenuItem();
+                    //    ToolStripSeparator separator = new ToolStripSeparator();
+                    //    tool.Text = itemLabels[t];
+                    //    contextMenuStrip1.Items.Insert(0, tool);
+                    //    contextMenuStrip1.Items.Insert(1, separator);
+                    //
+                    //    tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, itemNames[t], itemData[t]); };
+                    //}
+                    //t = 0;
+                    #endregion
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Something is wrong with storage file!");
+                    Application.Exit();
+                }
+
+            }
+        }
+        private void AddItemsToContextMenuAndStorage(ToolStripMenuItem item, ToolStripSeparator separator)
+        {
+            StreamWriter writerData = new StreamWriter("data.trs", true);
+            writerData.WriteLine(textBox2.Text);
+            writerData.WriteLine(textBox3.Text);
+            writerData.Close();
+            StreamWriter writerLabel = new StreamWriter("labels.trs", true);
+            writerLabel.WriteLine(item.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1));
+            writerLabel.Close();
             contextMenuStrip1.Items.Insert(0, item);
             contextMenuStrip1.Items.Insert(1, separator);
             this.Hide();
