@@ -13,13 +13,13 @@ namespace TraySafe
 {
     public partial class MainForm : Form
     {
-        public static ToolStripMenuItem _stripMenuItem;
-        public static ToolStripSeparator _separator;
-        public static string _iValues;
-        public static ContextMenuStrip _contextMenuStrip;
-        public MainForm()
+        private ToolStripMenuItem _tsi;
+        private string _itmVls;
+        public MainForm(ToolStripMenuItem tsi, string itmVls)
         {
             InitializeComponent();
+            this._tsi = tsi;
+            this._itmVls = itmVls;
             if (File.Exists("data.txt"))
             {
                 var Lines = File.ReadAllLines("data.txt");
@@ -80,41 +80,52 @@ namespace TraySafe
         {
             if (!string.IsNullOrWhiteSpace(textBox1.Text) && !string.IsNullOrWhiteSpace(textBox2.Text))
             {
-                ToolStripSeparator separator = new ToolStripSeparator();
-                ToolStripMenuItem item = new ToolStripMenuItem()
+                if (textBox1.Text == _tsi.Text && textBox2.Text == _itmVls)
                 {
-                    Text = textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1),
-                    Tag = "MenuItem"
-                };
-
-                string itemValues = textBox2.Text;
-
-                if (!File.Exists("data.txt"))
-                {
-                    AddItemsToContextMenu(item, separator);
+                    var editLines = File.ReadAllLines("data.txt");
+                    if (editLines.Contains(_tsi.Text) && editLines.Contains(_itmVls))
+                    {
+                        var newLines = editLines.Where(line => !line.Contains(_tsi.Text) && !line.Contains(_itmVls));
+                    }
                 }
                 else
                 {
-                    var Lines = File.ReadAllLines("data.txt");
-                    if (!Lines.Contains(item.Text) && !Lines.Contains(textBox2.Text))
+                    ToolStripSeparator separator = new ToolStripSeparator();
+                    ToolStripMenuItem item = new ToolStripMenuItem()
+                    {
+                        Text = textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1),
+                        Tag = "MenuItem"
+                    };
+
+                    string itemValues = textBox2.Text;
+
+                    if (!File.Exists("data.txt"))
                     {
                         AddItemsToContextMenu(item, separator);
                     }
-                    else if (Lines.Contains(item.Text))
-                    {
-                        infoLabel.Text = "Field with same label exists";
-                    }
-                    else if (Lines.Contains(textBox2.Text))
-                    {
-                        infoLabel.Text = "Field with same text exists";
-                    }
                     else
                     {
-                        infoLabel.Text = "Unknown Error!";
+                        var Lines = File.ReadAllLines("data.txt");
+                        if (!Lines.Contains(item.Text) && !Lines.Contains(textBox2.Text))
+                        {
+                            AddItemsToContextMenu(item, separator);
+                        }
+                        else if (Lines.Contains(item.Text))
+                        {
+                            infoLabel.Text = "Field with same name exists";
+                        }
+                        else if (Lines.Contains(textBox2.Text))
+                        {
+                            infoLabel.Text = "Field with same data exists";
+                        }
+                        else
+                        {
+                            infoLabel.Text = "Unknown Error!";
+                        }
                     }
-                }
 
-                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemValues); };
+                    item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemValues); };
+                }
             }
         }
         private void item_MouseDown(object senders, MouseEventArgs a, ToolStripMenuItem item, ToolStripSeparator separator, string itemValues)
@@ -125,12 +136,28 @@ namespace TraySafe
             }
             else if (a.Button == MouseButtons.Middle)
             {
-                _stripMenuItem = item;
-                _separator = separator;
-                _iValues = itemValues;
-                _contextMenuStrip = contextMenuStrip1;
-
-                new OptionsForm().Show();
+                DialogResult dialogResult = MessageBox.Show("Are you sure you want to remove this field?", "Remove", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    contextMenuStrip1.Items.Remove(item);
+                    contextMenuStrip1.Items.Remove(separator);
+                    var Lines = File.ReadAllLines("data.txt");
+                    if (Lines.Contains(item.Text))
+                    {
+                        var newLines = Lines.Where(line => !line.Contains(item.Text) && !line.Contains(itemValues));
+                        File.WriteAllLines("data.txt", newLines);
+                        this.Hide();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Not Found!");
+                    }
+                    contextMenuStrip1.Hide();
+                }
+                else if (dialogResult == DialogResult.No)
+                {
+                    return;
+                }
             }
         }
 
@@ -194,6 +221,5 @@ namespace TraySafe
         }
 
         #endregion
-
     }
 }
