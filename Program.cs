@@ -14,11 +14,9 @@ namespace TraySafe
         [STAThread]
         static void Main()
         {
-            ToolStripMenuItem _item = new ToolStripMenuItem();
-            string _itemValues = "";
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            MainForm form = new MainForm(_item, _itemValues);
+            MainForm form = new MainForm();
             Application.Run();
         }
     }
