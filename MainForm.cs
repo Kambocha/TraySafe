@@ -80,7 +80,7 @@ namespace TraySafe
                 ToolStripMenuItem item = new ToolStripMenuItem()
                 {
                     Text = textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1),
-                    Tag = "MenuItem"
+                    Tag = "menuItem"
                 };
 
                 string itemValues = textBox2.Text;
