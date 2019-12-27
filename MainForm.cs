@@ -69,14 +69,14 @@ namespace TraySafe
                 string itemName = textBox2.Text;
                 string itemData = textBox3.Text;
 
-                if (!File.Exists("labels.trs") && !File.Exists("data.trs"))
+                if (!File.Exists("labels.tsf") && !File.Exists("data.tsf"))
                 {
                     AddItemsToContextMenuAndStorage(item, separator);
                     AddItemLabelsToLabelStorage(item);
                 }
-                else if(File.Exists("labels.trs") && File.Exists("data.trs")) 
+                else if(File.Exists("labels.tsf") && File.Exists("data.tsf")) 
                 {
-                    var labels = File.ReadAllText("labels.trs");
+                    var labels = File.ReadAllText("labels.tsf");
 
                     if (!labels.Contains(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1)))
                     {
@@ -116,28 +116,35 @@ namespace TraySafe
                 {
                     contextMenuStrip1.Items.Remove(item);
                     contextMenuStrip1.Items.Remove(separator);
-                    var data = File.ReadAllLines("data.trs").ToList();
-                    var labels = File.ReadAllLines("labels.trs").ToList();
+                    var dataEn = File.ReadAllLines("data.tsf").ToList();
+                    List<string> dataDe = new List<string>();
 
-                    List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, data.Count / 2).Select(i => new KeyValuePair<string, string>(data[i * 2], data[i * 2 + 1])).ToList();
+                    foreach (var dataItem in dataEn)
+                    {
+                        dataDe.Add(Encryption.Decrypt(dataItem));
+                    }
 
-                    if (data.Contains(itemName) && labels.Contains(item.Text))
+                    var labels = File.ReadAllLines("labels.tsf").ToList();
+
+                    List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, dataDe.Count / 2).Select(i => new KeyValuePair<string, string>(dataDe[i * 2], dataDe[i * 2 + 1])).ToList();
+
+                    if (dataDe.Contains(itemName) && labels.Contains(item.Text))
                     {
                         int labelsIndex = labels.FindIndex(l => l.Contains(item.Text));
 
                         labels.Remove(item.Text);
-                        File.WriteAllLines("labels.trs", labels);
+                        File.WriteAllLines("labels.tsf", labels);
 
                         dataKvp.RemoveAt(labelsIndex);
                         List<string> printList = new List<string>();
 
                         foreach (var pair in dataKvp)
                         {
-                            printList.Add(pair.Key);
-                            printList.Add(pair.Value);
+                            printList.Add(Encryption.Encrypt(pair.Key));
+                            printList.Add(Encryption.Encrypt(pair.Value));
                         }
 
-                        File.WriteAllLines("data.trs", printList);
+                        File.WriteAllLines("data.tsf", printList);
                         this.Hide();
                     }
                     else
@@ -168,15 +175,29 @@ namespace TraySafe
 
         private void LoadDataWhenAppIsLoaded()
         {
-            if (File.Exists("data.trs") && File.Exists("labels.trs"))
+            if (File.Exists("data.tsf") && File.Exists("labels.tsf"))
             {
-                var data = File.ReadAllLines("data.trs");
-                var labels = File.ReadAllLines("labels.trs");
+                var data = File.ReadAllLines("data.tsf");
+                var labels = File.ReadAllLines("labels.tsf");
 
                 try
                 {
-                    var itemNames = data.Where((c, i) => i % 2 == 0).ToList();
-                    var itemData = data.Where((c, i) => i % 2 != 0).ToList();
+                    var itemNamesEn = data.Where((c, i) => i % 2 == 0).ToList();
+                    var itemDataEn = data.Where((c, i) => i % 2 != 0).ToList();
+
+                    List<string> itemNamesDe = new List<string>();
+                    List<string> itemDataDe = new List<string>();
+
+                    foreach (var enName in itemNamesEn)
+                    {
+                        itemNamesDe.Add(Encryption.Decrypt(enName));
+                    }
+
+                    foreach (var enData in itemDataEn)
+                    {
+                        itemDataDe.Add(Encryption.Decrypt(enData));
+                    }
+
                     var itemLabels = labels.ToList();
 
                     int counter = 0;
@@ -189,8 +210,8 @@ namespace TraySafe
                         contextMenuStrip1.Items.Insert(0, tool);
                         contextMenuStrip1.Items.Insert(1, separator);
 
-                        string innerName = itemNames[counter].First().ToString().ToLower() + itemNames[counter].Substring(1);
-                        string innerData = itemData[counter];
+                        string innerName = itemNamesDe[counter].First().ToString().ToLower() + itemNamesDe[counter].Substring(1);
+                        string innerData = itemDataDe[counter];
 
                         tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, innerName, innerData); };
                         counter++;
@@ -226,9 +247,11 @@ namespace TraySafe
         }
         private void AddItemsToContextMenuAndStorage(ToolStripMenuItem item, ToolStripSeparator separator)
         {
-            StreamWriter writerData = new StreamWriter("data.trs", true);
-            writerData.WriteLine(textBox2.Text);
-            writerData.WriteLine(textBox3.Text);
+            StreamWriter writerData = new StreamWriter("data.tsf", true);
+            string encryptedName = Encryption.Encrypt(textBox2.Text);
+            string encryptedData = Encryption.Encrypt(textBox3.Text);
+            writerData.WriteLine(encryptedName);
+            writerData.WriteLine(encryptedData);
             writerData.Close();
             contextMenuStrip1.Items.Insert(0, item);
             contextMenuStrip1.Items.Insert(1, separator);
@@ -236,7 +259,7 @@ namespace TraySafe
 
         private void AddItemLabelsToLabelStorage(ToolStripMenuItem item)
         {
-            StreamWriter writerLabel = new StreamWriter("labels.trs", true);
+            StreamWriter writerLabel = new StreamWriter("labels.tsf", true);
             writerLabel.WriteLine(item.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1));
             writerLabel.Close();
             this.Hide();
