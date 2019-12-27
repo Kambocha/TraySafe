@@ -68,7 +68,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Encryption.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
