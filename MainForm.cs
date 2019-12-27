@@ -69,14 +69,14 @@ namespace TraySafe
                 string itemName = textBox2.Text;
                 string itemData = textBox3.Text;
 
-                if (!File.Exists("labels.trs") && !File.Exists("data.trs"))
+                if (!File.Exists("labels.tsf") && !File.Exists("data.tsf"))
                 {
                     AddItemsToContextMenuAndStorage(item, separator);
                     AddItemLabelsToLabelStorage(item);
                 }
-                else if(File.Exists("labels.trs") && File.Exists("data.trs")) 
+                else if(File.Exists("labels.tsf") && File.Exists("data.tsf")) 
                 {
-                    var labels = File.ReadAllText("labels.trs");
+                    var labels = File.ReadAllText("labels.tsf");
 
                     if (!labels.Contains(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1)))
                     {
@@ -116,8 +116,8 @@ namespace TraySafe
                 {
                     contextMenuStrip1.Items.Remove(item);
                     contextMenuStrip1.Items.Remove(separator);
-                    var data = File.ReadAllLines("data.trs").ToList();
-                    var labels = File.ReadAllLines("labels.trs").ToList();
+                    var data = File.ReadAllLines("data.tsf").ToList();
+                    var labels = File.ReadAllLines("labels.tsf").ToList();
 
                     List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, data.Count / 2).Select(i => new KeyValuePair<string, string>(data[i * 2], data[i * 2 + 1])).ToList();
 
@@ -126,7 +126,7 @@ namespace TraySafe
                         int labelsIndex = labels.FindIndex(l => l.Contains(item.Text));
 
                         labels.Remove(item.Text);
-                        File.WriteAllLines("labels.trs", labels);
+                        File.WriteAllLines("labels.tsf", labels);
 
                         dataKvp.RemoveAt(labelsIndex);
                         List<string> printList = new List<string>();
@@ -137,7 +137,7 @@ namespace TraySafe
                             printList.Add(pair.Value);
                         }
 
-                        File.WriteAllLines("data.trs", printList);
+                        File.WriteAllLines("data.tsf", printList);
                         this.Hide();
                     }
                     else
@@ -173,10 +173,10 @@ namespace TraySafe
 
         private void LoadDataWhenAppIsLoaded()
         {
-            if (File.Exists("data.trs") && File.Exists("labels.trs"))
+            if (File.Exists("data.tsf") && File.Exists("labels.tsf"))
             {
-                var data = File.ReadAllLines("data.trs");
-                var labels = File.ReadAllLines("labels.trs");
+                var data = File.ReadAllLines("data.tsf");
+                var labels = File.ReadAllLines("labels.tsf");
 
                 try
                 {
@@ -211,7 +211,7 @@ namespace TraySafe
         }
         private void AddItemsToContextMenuAndStorage(ToolStripMenuItem item, ToolStripSeparator separator)
         {
-            StreamWriter writerData = new StreamWriter("data.trs", true);
+            StreamWriter writerData = new StreamWriter("data.tsf", true);
             writerData.WriteLine(textBox2.Text);
             writerData.WriteLine(textBox3.Text);
             writerData.Close();
@@ -221,7 +221,7 @@ namespace TraySafe
 
         private void AddItemLabelsToLabelStorage(ToolStripMenuItem item)
         {
-            StreamWriter writerLabel = new StreamWriter("labels.trs", true);
+            StreamWriter writerLabel = new StreamWriter("labels.tsf", true);
             writerLabel.WriteLine(item.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1));
             writerLabel.Close();
             this.Hide();
