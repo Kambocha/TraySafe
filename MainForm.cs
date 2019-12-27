@@ -69,10 +69,13 @@ namespace TraySafe
                 string itemName = textBox2.Text;
                 string itemData = textBox3.Text;
 
+                int counter = -1;
 
                 if (!File.Exists("labels.trs") && !File.Exists("data.trs"))
                 {
                     AddItemsToContextMenuAndStorage(item, separator);
+                    AddItemLabelsToLabelStorage(item);
+                    counter++;
                 }
                 else if(File.Exists("labels.trs") && File.Exists("data.trs")) 
                 {
@@ -81,6 +84,8 @@ namespace TraySafe
                     if (!labels.Contains(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1)))
                     {
                         AddItemsToContextMenuAndStorage(item, separator);
+                        AddItemLabelsToLabelStorage(item);
+                        counter++;
                     }
                     else
                     {
@@ -115,25 +120,32 @@ namespace TraySafe
                 {
                     contextMenuStrip1.Items.Remove(item);
                     contextMenuStrip1.Items.Remove(separator);
-                    var data = File.ReadAllLines("data.trs");
-                    var labels = File.ReadAllLines("labels.trs");
+                    var data = File.ReadAllLines("data.trs").ToList();
+                    var labels = File.ReadAllLines("labels.trs").ToList();
+
+                    var dataKvp = Enumerable.Range(0, data.Count / 2).Select(i => new KeyValuePair<string, string>(data[i * 2], data[i * 2 + 1])).ToList();
 
                     List<string> dataList = new List<string>();
                     dataList.AddRange(data);
+                    
+                    //List<string> labelsList = new List<string>();
+                    //labelsList.AddRange(labels);
 
-                    List<string> labelsList = new List<string>();
-                    labelsList.AddRange(labels);
-
-                    if (data.Contains(itemName))
+                    if (data.Contains(itemName) && labels.Contains(item.Text))
                     {
-                        if (labels.Contains(item.Text))
+                        labels.Remove(item.Text);
+                        File.WriteAllLines("labels.trs", labels);
+
+                        dataKvp.Remove(new KeyValuePair<string, string> (itemName, itemData));
+                        List<string> printList = new List<string>();
+
+                        foreach (var pair in dataKvp)
                         {
-                            labelsList.Remove(item.Text);
-                            File.WriteAllLines("labels.trs", labelsList);
+                            printList.Add(pair.Key);
+                            printList.Add(pair.Value);
                         }
-                        dataList.Remove(itemName);
-                        dataList.Remove(itemData);
-                        File.WriteAllLines("data.trs", dataList);
+
+                        File.WriteAllLines("data.trs", printList);
                         this.Hide();
                     }
                     else
@@ -226,13 +238,18 @@ namespace TraySafe
             writerData.WriteLine(textBox2.Text);
             writerData.WriteLine(textBox3.Text);
             writerData.Close();
+            contextMenuStrip1.Items.Insert(0, item);
+            contextMenuStrip1.Items.Insert(1, separator);
+        }
+
+        private void AddItemLabelsToLabelStorage(ToolStripMenuItem item)
+        {
             StreamWriter writerLabel = new StreamWriter("labels.trs", true);
             writerLabel.WriteLine(item.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1));
             writerLabel.Close();
-            contextMenuStrip1.Items.Insert(0, item);
-            contextMenuStrip1.Items.Insert(1, separator);
             this.Hide();
         }
+
         bool IsEnglishCharacter(char ch)
         {
             if (ch >= 97 && ch <= 122 || ch >= 65 && ch <= 90 || ch >= 48 && ch <= 57)
