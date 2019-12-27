@@ -123,20 +123,16 @@ namespace TraySafe
                     var data = File.ReadAllLines("data.trs").ToList();
                     var labels = File.ReadAllLines("labels.trs").ToList();
 
-                    var dataKvp = Enumerable.Range(0, data.Count / 2).Select(i => new KeyValuePair<string, string>(data[i * 2], data[i * 2 + 1])).ToList();
-
-                    List<string> dataList = new List<string>();
-                    dataList.AddRange(data);
-                    
-                    //List<string> labelsList = new List<string>();
-                    //labelsList.AddRange(labels);
+                    List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, data.Count / 2).Select(i => new KeyValuePair<string, string>(data[i * 2], data[i * 2 + 1])).ToList();
 
                     if (data.Contains(itemName) && labels.Contains(item.Text))
                     {
+                        int labelsIndex = labels.FindIndex(l => l.Contains(item.Text));
+
                         labels.Remove(item.Text);
                         File.WriteAllLines("labels.trs", labels);
 
-                        dataKvp.Remove(new KeyValuePair<string, string> (itemName, itemData));
+                        dataKvp.RemoveAt(labelsIndex);
                         List<string> printList = new List<string>();
 
                         foreach (var pair in dataKvp)
