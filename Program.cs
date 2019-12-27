@@ -34,6 +34,8 @@ namespace TraySafe
                 MainForm form = new MainForm();
                 Application.Run();
             }
+
+
         }
     }
 }
