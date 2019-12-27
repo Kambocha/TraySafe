@@ -164,9 +164,19 @@ namespace TraySafe
         private void TextBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             CheckIfInputIsEnglish(e);
+            if (e.KeyChar >= 32 && e.KeyChar <= 47 || e.KeyChar >= 58 && e.KeyChar <= 64 || e.KeyChar >= 91 && e.KeyChar <= 96 || e.KeyChar >= 123 && e.KeyChar <= 126)
+            {
+                infoLabel.Text = "Input cannot contain symbols";
+                e.Handled = true;
+            }
         }
 
         private void TextBox2_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            CheckIfInputIsEmail(e);
+        }
+
+        private void TextBox3_KeyPress(object sender, KeyPressEventArgs e)
         {
             CheckIfInputIsEnglish(e);
         }
@@ -286,16 +296,38 @@ namespace TraySafe
 
             if (!IsEnglishCharacter(e.KeyChar))
             {
-                if (e.KeyChar >= 32 && e.KeyChar <= 47 || e.KeyChar >= 58 && e.KeyChar <= 64 || e.KeyChar >= 91 && e.KeyChar <= 96 || e.KeyChar >= 123 && e.KeyChar <= 126)
-                {
-                    infoLabel.Text = "Input cannot contain symbols";
-                    e.Handled = true;
-                }
-                else
-                {
-                    infoLabel.Text = "Input has to be in english";
-                    e.Handled = true;
-                }
+                infoLabel.Text = "Input has to be in english";
+                e.Handled = true;
+            }
+            else
+            {
+                infoLabel.Text = "";
+            }
+        }
+
+        bool IsEmailCharacter(char ch)
+        {
+            if (ch >= 32 && ch <= 44 || ch == 47 || ch >= 58 && ch <= 63 || ch >= 91 && ch <= 94 || ch == 96 || ch >= 123 && ch <= 126)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void CheckIfInputIsEmail(KeyPressEventArgs e)
+        {
+            Keys key = (Keys)e.KeyChar;
+
+            if (key == Keys.Back)
+            {
+                return;
+            }
+
+            if (!IsEmailCharacter(e.KeyChar))
+            {
+                infoLabel.Text = "Input cannot contain these symbols";
+                e.Handled = true;
             }
             else
             {

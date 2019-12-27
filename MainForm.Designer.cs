@@ -141,6 +141,7 @@ namespace TraySafe
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(320, 20);
             this.textBox2.TabIndex = 7;
+            this.textBox2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox2_KeyPress);
             // 
             // textBox3
             // 
@@ -148,6 +149,7 @@ namespace TraySafe
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(320, 20);
             this.textBox3.TabIndex = 8;
+            this.textBox3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.TextBox3_KeyPress);
             // 
             // addButton
             // 
