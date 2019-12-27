@@ -120,7 +120,7 @@ namespace TraySafe
             // infoLabel
             // 
             this.infoLabel.AutoSize = true;
-            this.infoLabel.Location = new System.Drawing.Point(59, 39);
+            this.infoLabel.Location = new System.Drawing.Point(57, 40);
             this.infoLabel.Name = "infoLabel";
             this.infoLabel.Size = new System.Drawing.Size(0, 13);
             this.infoLabel.TabIndex = 5;
