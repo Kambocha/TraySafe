@@ -157,11 +157,6 @@ namespace TraySafe
         private void TextBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             CheckIfInputIsEnglish(e);
-            if (e.KeyChar >= 32 && e.KeyChar <= 47 || e.KeyChar >= 58 && e.KeyChar <= 64 || e.KeyChar >= 91 && e.KeyChar <= 96 || e.KeyChar >= 123 && e.KeyChar <= 126)
-            {
-                infoLabel.Text = "Input cannot contain symbols";
-                e.Handled = true;
-            }
         }
 
         private void TextBox2_KeyPress(object sender, KeyPressEventArgs e)
@@ -171,7 +166,7 @@ namespace TraySafe
 
         private void TextBox3_KeyPress(object sender, KeyPressEventArgs e)
         {
-            CheckIfInputIsEnglish(e);
+            CheckIfInputIsPassword(e);
         }
 
         #region Helper Methods
@@ -252,8 +247,11 @@ namespace TraySafe
             this.Hide();
         }
 
+        #region English Check
+
         bool IsEnglishCharacter(char ch)
         {
+            //a-z and A-Z and 0-9
             if (ch >= 97 && ch <= 122 || ch >= 65 && ch <= 90 || ch >= 48 && ch <= 57)
             {
                 return true;
@@ -271,33 +269,27 @@ namespace TraySafe
                 return;
             }
 
-            if (!IsEnglishCharacter(e.KeyChar))
+            else if (!IsEnglishCharacter(e.KeyChar))
             {
-                if (e.KeyChar >= 32 && e.KeyChar <= 47 || e.KeyChar >= 58 && e.KeyChar <= 64 || e.KeyChar >= 91 && e.KeyChar <= 96 || e.KeyChar >= 123 && e.KeyChar <= 126)
-                {
-                    infoLabel.Text = "Input cannot contain symbols";
-                    e.Handled = true;
-                }
-                else
-                {
-                    infoLabel.Text = "Input has to be in english";
-                    e.Handled = true;
-                }
+                infoLabel.Text = "Only english and no symbols allowed";
+                e.Handled = true;
             }
             else
             {
                 infoLabel.Text = "";
             }
         }
+        #endregion
 
+        #region Email Check
         bool IsEmailCharacter(char ch)
         {
-            if (ch >= 32 && ch <= 44 || ch == 47 || ch >= 58 && ch <= 63 || ch >= 91 && ch <= 94 || ch == 96 || ch >= 123 && ch <= 126)
+            if (ch >= 45 && ch <= 46 || ch >= 48 && ch <= 57 || ch == 64 || ch >= 65 && ch <= 90 || ch == 95 || ch >= 97 && ch <= 122)
             {
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         private void CheckIfInputIsEmail(KeyPressEventArgs e)
@@ -309,7 +301,39 @@ namespace TraySafe
                 return;
             }
 
-            if (!IsEmailCharacter(e.KeyChar))
+            else if (!IsEmailCharacter(e.KeyChar))
+            {
+                infoLabel.Text = "Only english and email symbols allowed";
+                e.Handled = true;
+            }
+            else
+            {
+                infoLabel.Text = "";
+            }
+        }
+        #endregion
+
+        #region Password Check
+        bool IsPasswordCharacter(char ch)
+        {
+            if (ch >= 33 && ch <= 126)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private void CheckIfInputIsPassword(KeyPressEventArgs e)
+        {
+            Keys key = (Keys)e.KeyChar;
+
+            if (key == Keys.Back)
+            {
+                return;
+            }
+
+            else if (!IsPasswordCharacter(e.KeyChar))
             {
                 infoLabel.Text = "Input cannot contain these symbols";
                 e.Handled = true;
@@ -319,6 +343,7 @@ namespace TraySafe
                 infoLabel.Text = "";
             }
         }
+        #endregion
 
 
         #endregion
