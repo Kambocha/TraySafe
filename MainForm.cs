@@ -74,7 +74,7 @@ namespace TraySafe
                     AddItemsToContextMenuAndStorage(item, separator);
                     AddItemLabelsToLabelStorage(item);
                 }
-                else if(File.Exists("labels.tsf") && File.Exists("data.tsf")) 
+                else if (File.Exists("labels.tsf") && File.Exists("data.tsf"))
                 {
                     var labels = File.ReadAllText("labels.tsf");
 
@@ -93,7 +93,7 @@ namespace TraySafe
                     MessageBox.Show("One of two storage files is missing!");
                 }
 
-                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };                
+                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };
             }
         }
 
@@ -110,25 +110,18 @@ namespace TraySafe
                 notifyIcon1.ShowBalloonTip(1000, string.Empty, "Copied data", ToolTipIcon.None);
             }
             else if (a.Button == MouseButtons.Middle)
-            { 
+            {
                 DialogResult dialogResult = MessageBox.Show("Are you sure you want to remove this field?", "Remove", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
                     contextMenuStrip1.Items.Remove(item);
                     contextMenuStrip1.Items.Remove(separator);
-                    var dataEn = File.ReadAllLines("data.tsf").ToList();
-                    List<string> dataDe = new List<string>();
-
-                    foreach (var dataItem in dataEn)
-                    {
-                        dataDe.Add(Encryption.Decrypt(dataItem));
-                    }
-
+                    var data = File.ReadAllLines("data.tsf").ToList();
                     var labels = File.ReadAllLines("labels.tsf").ToList();
 
-                    List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, dataDe.Count / 2).Select(i => new KeyValuePair<string, string>(dataDe[i * 2], dataDe[i * 2 + 1])).ToList();
+                    List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, data.Count / 2).Select(i => new KeyValuePair<string, string>(data[i * 2], data[i * 2 + 1])).ToList();
 
-                    if (dataDe.Contains(itemName) && labels.Contains(item.Text))
+                    if (data.Contains(itemName) && labels.Contains(item.Text))
                     {
                         int labelsIndex = labels.FindIndex(l => l.Contains(item.Text));
 
@@ -140,8 +133,8 @@ namespace TraySafe
 
                         foreach (var pair in dataKvp)
                         {
-                            printList.Add(Encryption.Encrypt(pair.Key));
-                            printList.Add(Encryption.Encrypt(pair.Value));
+                            printList.Add(pair.Key);
+                            printList.Add(pair.Value);
                         }
 
                         File.WriteAllLines("data.tsf", printList);
@@ -187,22 +180,8 @@ namespace TraySafe
 
                 try
                 {
-                    var itemNamesEn = data.Where((c, i) => i % 2 == 0).ToList();
-                    var itemDataEn = data.Where((c, i) => i % 2 != 0).ToList();
-
-                    List<string> itemNamesDe = new List<string>();
-                    List<string> itemDataDe = new List<string>();
-
-                    foreach (var enName in itemNamesEn)
-                    {
-                        itemNamesDe.Add(Encryption.Decrypt(enName));
-                    }
-
-                    foreach (var enData in itemDataEn)
-                    {
-                        itemDataDe.Add(Encryption.Decrypt(enData));
-                    }
-
+                    var itemNames = data.Where((c, i) => i % 2 == 0).ToList();
+                    var itemData = data.Where((c, i) => i % 2 != 0).ToList();
                     var itemLabels = labels.ToList();
 
                     int counter = 0;
@@ -215,8 +194,8 @@ namespace TraySafe
                         contextMenuStrip1.Items.Insert(0, tool);
                         contextMenuStrip1.Items.Insert(1, separator);
 
-                        string innerName = itemNamesDe[counter].First().ToString().ToLower() + itemNamesDe[counter].Substring(1);
-                        string innerData = itemDataDe[counter];
+                        string innerName = itemNames[counter].First().ToString().ToLower() + itemNames[counter].Substring(1);
+                        string innerData = itemData[counter];
 
                         tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, innerName, innerData); };
                         counter++;
@@ -225,8 +204,6 @@ namespace TraySafe
                 catch (Exception)
                 {
                     MessageBox.Show("Something is wrong with storage file!");
-                    File.Delete("data.tsf");
-                    File.Delete("labels.tsf");
                     Application.Exit();
                 }
 
@@ -235,10 +212,8 @@ namespace TraySafe
         private void AddItemsToContextMenuAndStorage(ToolStripMenuItem item, ToolStripSeparator separator)
         {
             StreamWriter writerData = new StreamWriter("data.tsf", true);
-            string encryptedName = Encryption.Encrypt(textBox2.Text);
-            string encryptedData = Encryption.Encrypt(textBox3.Text);
-            writerData.WriteLine(encryptedName);
-            writerData.WriteLine(encryptedData);
+            writerData.WriteLine(textBox2.Text);
+            writerData.WriteLine(textBox3.Text);
             writerData.Close();
             contextMenuStrip1.Items.Insert(0, item);
             contextMenuStrip1.Items.Insert(1, separator);
@@ -349,6 +324,7 @@ namespace TraySafe
             }
         }
         #endregion
+
 
         #endregion
     }
