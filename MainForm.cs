@@ -69,13 +69,10 @@ namespace TraySafe
                 string itemName = textBox2.Text;
                 string itemData = textBox3.Text;
 
-                int counter = -1;
-
                 if (!File.Exists("labels.trs") && !File.Exists("data.trs"))
                 {
                     AddItemsToContextMenuAndStorage(item, separator);
                     AddItemLabelsToLabelStorage(item);
-                    counter++;
                 }
                 else if(File.Exists("labels.trs") && File.Exists("data.trs")) 
                 {
@@ -85,7 +82,6 @@ namespace TraySafe
                     {
                         AddItemsToContextMenuAndStorage(item, separator);
                         AddItemLabelsToLabelStorage(item);
-                        counter++;
                     }
                     else
                     {
