@@ -110,7 +110,7 @@ namespace TraySafe
                 notifyIcon1.ShowBalloonTip(1000, string.Empty, "Copied data", ToolTipIcon.None);
             }
             else if (a.Button == MouseButtons.Middle)
-            {
+            { 
                 DialogResult dialogResult = MessageBox.Show("Are you sure you want to remove this field?", "Remove", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
@@ -221,26 +221,6 @@ namespace TraySafe
                         tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, innerName, innerData); };
                         counter++;
                     }
-
-                    //var mergedLists = itemNames.Select((k, idx) => new { k, idx })
-                    //                      .GroupBy(x => x.k)
-                    //                      .ToDictionary(g => g.Key.First().ToString().ToUpper() + g.Key.Substring(1), g => g.Select(c => itemData[c.idx]).Single());
-
-
-                    #region semi-working method
-                    //int t;
-                    //for (t = 0; t < itemLabels.Count; t++)
-                    //{
-                    //    ToolStripMenuItem tool = new ToolStripMenuItem();
-                    //    ToolStripSeparator separator = new ToolStripSeparator();
-                    //    tool.Text = itemLabels[t];
-                    //    contextMenuStrip1.Items.Insert(0, tool);
-                    //    contextMenuStrip1.Items.Insert(1, separator);
-                    //
-                    //    tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, itemNames[t], itemData[t]); };
-                    //}
-                    //t = 0;
-                    #endregion
                 }
                 catch (Exception)
                 {
