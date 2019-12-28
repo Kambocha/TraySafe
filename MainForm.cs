@@ -93,13 +93,22 @@ namespace TraySafe
                     MessageBox.Show("One of two storage files is missing!");
                 }
 
-                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };                
+
+                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };
             }
         }
 
         private void item_MouseDown(object senders, MouseEventArgs a, ToolStripMenuItem item, ToolStripSeparator separator, string itemName, string itemData)
         {
-            if (a.Button == MouseButtons.Left)
+            if (a.Button == MouseButtons.Left && (ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                RemoveItemsFromContextMenuAndStorage(item, separator, itemName, itemData);
+            }
+            else if (a.Button == MouseButtons.Middle)
+            {
+                RemoveItemsFromContextMenuAndStorage(item, separator, itemName, itemData);
+            }
+            else if (a.Button == MouseButtons.Left)
             {
                 Clipboard.SetText(itemName);
                 notifyIcon1.ShowBalloonTip(1000, string.Empty, "Copied name", ToolTipIcon.None);
@@ -108,56 +117,6 @@ namespace TraySafe
             {
                 Clipboard.SetText(itemData);
                 notifyIcon1.ShowBalloonTip(1000, string.Empty, "Copied data", ToolTipIcon.None);
-            }
-            else if (a.Button == MouseButtons.Middle)
-            { 
-                DialogResult dialogResult = MessageBox.Show("Are you sure you want to remove this field?", "Remove", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    contextMenuStrip1.Items.Remove(item);
-                    contextMenuStrip1.Items.Remove(separator);
-                    var dataEn = File.ReadAllLines("data.tsf").ToList();
-                    List<string> dataDe = new List<string>();
-
-                    foreach (var dataItem in dataEn)
-                    {
-                        dataDe.Add(Encryption.Decrypt(dataItem));
-                    }
-
-                    var labels = File.ReadAllLines("labels.tsf").ToList();
-
-                    List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, dataDe.Count / 2).Select(i => new KeyValuePair<string, string>(dataDe[i * 2], dataDe[i * 2 + 1])).ToList();
-
-                    if (dataDe.Contains(itemName) && labels.Contains(item.Text))
-                    {
-                        int labelsIndex = labels.FindIndex(l => l.Contains(item.Text));
-
-                        labels.Remove(item.Text);
-                        File.WriteAllLines("labels.tsf", labels);
-
-                        dataKvp.RemoveAt(labelsIndex);
-                        List<string> printList = new List<string>();
-
-                        foreach (var pair in dataKvp)
-                        {
-                            printList.Add(Encryption.Encrypt(pair.Key));
-                            printList.Add(Encryption.Encrypt(pair.Value));
-                        }
-
-                        File.WriteAllLines("data.tsf", printList);
-                        this.Hide();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Not Found!");
-                    }
-                    contextMenuStrip1.Hide();
-                }
-                else if (dialogResult == DialogResult.No)
-                {
-                    contextMenuStrip1.Hide();
-                    return;
-                }
             }
         }
 
@@ -218,6 +177,7 @@ namespace TraySafe
                         string innerName = itemNamesDe[counter].First().ToString().ToLower() + itemNamesDe[counter].Substring(1);
                         string innerData = itemDataDe[counter];
 
+                        //tool.MouseHover += delegate (object senders, EventArgs a) { item_MouseHover(senders, a, tool, separator, innerName, innerData); };
                         tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, innerName, innerData); };
                         counter++;
                     }
@@ -243,7 +203,56 @@ namespace TraySafe
             contextMenuStrip1.Items.Insert(0, item);
             contextMenuStrip1.Items.Insert(1, separator);
         }
+        private void RemoveItemsFromContextMenuAndStorage(ToolStripMenuItem item, ToolStripSeparator separator, string itemName, string itemData)
+        {
+            DialogResult dialogResult = MessageBox.Show("Are you sure you want to remove this field?", "Remove", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                contextMenuStrip1.Items.Remove(item);
+                contextMenuStrip1.Items.Remove(separator);
+                var dataEn = File.ReadAllLines("data.tsf").ToList();
+                List<string> dataDe = new List<string>();
 
+                foreach (var dataItem in dataEn)
+                {
+                    dataDe.Add(Encryption.Decrypt(dataItem));
+                }
+
+                var labels = File.ReadAllLines("labels.tsf").ToList();
+
+                List<KeyValuePair<string, string>> dataKvp = Enumerable.Range(0, dataDe.Count / 2).Select(i => new KeyValuePair<string, string>(dataDe[i * 2], dataDe[i * 2 + 1])).ToList();
+
+                if (dataDe.Contains(itemName) && labels.Contains(item.Text))
+                {
+                    int labelsIndex = labels.FindIndex(l => l.Contains(item.Text));
+
+                    labels.Remove(item.Text);
+                    File.WriteAllLines("labels.tsf", labels);
+
+                    dataKvp.RemoveAt(labelsIndex);
+                    List<string> printList = new List<string>();
+
+                    foreach (var pair in dataKvp)
+                    {
+                        printList.Add(Encryption.Encrypt(pair.Key));
+                        printList.Add(Encryption.Encrypt(pair.Value));
+                    }
+
+                    File.WriteAllLines("data.tsf", printList);
+                    this.Hide();
+                }
+                else
+                {
+                    MessageBox.Show("Not Found!");
+                }
+                contextMenuStrip1.Hide();
+            }
+            else if (dialogResult == DialogResult.No)
+            {
+                contextMenuStrip1.Hide();
+                return;
+            }
+        }
         private void AddItemLabelsToLabelStorage(ToolStripMenuItem item)
         {
             StreamWriter writerLabel = new StreamWriter("labels.tsf", true);
