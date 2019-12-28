@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -59,42 +60,54 @@ namespace TraySafe
         {
             if (!string.IsNullOrWhiteSpace(textBox1.Text) && !string.IsNullOrWhiteSpace(textBox2.Text) && !string.IsNullOrWhiteSpace(textBox3.Text))
             {
-                ToolStripSeparator separator = new ToolStripSeparator();
-                ToolStripMenuItem item = new ToolStripMenuItem()
+                var regexTextBox1 = new Regex("^[a-zA-Z0-9]*$");
+                var regexTextBox2 = new Regex("^[a-zA-Z0-9@_.-]*$");
+                if (regexTextBox1.IsMatch(textBox1.Text) && regexTextBox2.IsMatch(textBox2.Text))
                 {
-                    Text = textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1),
-                    Tag = "menuItem"
-                };
+                    ToolStripSeparator separator = new ToolStripSeparator();
+                    ToolStripMenuItem item = new ToolStripMenuItem()
+                    {
+                        Text = textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1),
+                        Tag = "menuItem"
+                    };
 
-                string itemName = textBox2.Text;
-                string itemData = textBox3.Text;
+                    string itemName = textBox2.Text;
+                    string itemData = textBox3.Text;
 
-                if (!File.Exists("labels.tsf") && !File.Exists("data.tsf"))
-                {
-                    AddItemsToContextMenuAndStorage(item, separator);
-                    AddItemLabelsToLabelStorage(item);
-                }
-                else if(File.Exists("labels.tsf") && File.Exists("data.tsf")) 
-                {
-                    var labels = File.ReadAllText("labels.tsf");
-
-                    if (!labels.Contains(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1)))
+                    if (!File.Exists("labels.tsf") && !File.Exists("data.tsf"))
                     {
                         AddItemsToContextMenuAndStorage(item, separator);
                         AddItemLabelsToLabelStorage(item);
                     }
+                    else if (File.Exists("labels.tsf") && File.Exists("data.tsf"))
+                    {
+                        var labels = File.ReadAllText("labels.tsf");
+
+                        if (!labels.Contains(textBox1.Text.First().ToString().ToUpper() + textBox1.Text.Substring(1)))
+                        {
+                            AddItemsToContextMenuAndStorage(item, separator);
+                            AddItemLabelsToLabelStorage(item);
+                        }
+                        else
+                        {
+                            infoLabel.Text = "Field with same label already exists";
+                        }
+                    }
                     else
                     {
-                        infoLabel.Text = "Field with same label already exists";
+                        MessageBox.Show("One of two storage files is missing!");
                     }
+
+                    item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };
                 }
-                else
+                else if (!regexTextBox1.IsMatch(textBox1.Text))
                 {
-                    MessageBox.Show("One of two storage files is missing!");
+                    infoLabel.Text = "Label: Only english and no symbols";
                 }
-
-
-                item.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, item, separator, itemName, itemData); };
+                else if (!regexTextBox2.IsMatch(textBox2.Text))
+                {
+                    infoLabel.Text = "Name: Only english and email symbols";
+                }
             }
         }
 
@@ -266,7 +279,7 @@ namespace TraySafe
         bool IsEnglishCharacter(char ch)
         {
             //a-z and A-Z and 0-9
-            if (ch >= 97 && ch <= 122 || ch >= 65 && ch <= 90 || ch >= 48 && ch <= 57)
+            if (ch == 24 || ch == 3 || ch == 22 || ch >= 97 && ch <= 122 || ch >= 65 && ch <= 90 || ch >= 48 && ch <= 57)
             {
                 return true;
             }
@@ -285,7 +298,7 @@ namespace TraySafe
 
             else if (!IsEnglishCharacter(e.KeyChar))
             {
-                infoLabel.Text = "Only english and no symbols allowed";
+                infoLabel.Text = "Label: Only english and no symbols";
                 e.Handled = true;
             }
             else
@@ -298,7 +311,7 @@ namespace TraySafe
         #region Email Check
         bool IsEmailCharacter(char ch)
         {
-            if (ch >= 45 && ch <= 46 || ch >= 48 && ch <= 57 || ch == 64 || ch >= 65 && ch <= 90 || ch == 95 || ch >= 97 && ch <= 122)
+            if (ch == 24 || ch == 3 || ch == 22 || ch >= 45 && ch <= 46 || ch >= 48 && ch <= 57 || ch == 64 || ch >= 65 && ch <= 90 || ch == 95 || ch >= 97 && ch <= 122)
             {
                 return true;
             }
@@ -317,7 +330,7 @@ namespace TraySafe
 
             else if (!IsEmailCharacter(e.KeyChar))
             {
-                infoLabel.Text = "Only english and email symbols allowed";
+                infoLabel.Text = "Name: Only english and email symbols";
                 e.Handled = true;
             }
             else
@@ -330,7 +343,7 @@ namespace TraySafe
         #region Password Check
         bool IsPasswordCharacter(char ch)
         {
-            if (ch >= 33 && ch <= 126)
+            if (ch == 24 || ch == 3 || ch == 22 || ch >= 33 && ch <= 126)
             {
                 return true;
             }
@@ -358,6 +371,7 @@ namespace TraySafe
             }
         }
         #endregion
+
 
         #endregion
     }
