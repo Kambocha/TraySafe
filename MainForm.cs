@@ -362,7 +362,7 @@ namespace TraySafe
 
             else if (!IsPasswordCharacter(e.KeyChar))
             {
-                infoLabel.Text = "Input cannot contain these symbols";
+                infoLabel.Text = "Data: Only english";
                 e.Handled = true;
             }
             else
