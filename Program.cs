@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -30,12 +31,21 @@ namespace TraySafe
                     MessageBox.Show("Instance of TraySafe already running");
                     return;
                 }
-
-                MainForm form = new MainForm();
-                Application.Run();
+                else if (!File.Exists("pin.tsf"))
+                {
+                    if (File.Exists("data.tsf") && File.Exists("labels.tsf"))
+                    {
+                        MessageBox.Show("The pin file seems to have been deleted manually. Removing storage files for safety measures.");
+                        File.Delete("data.tsf");
+                        File.Delete("labels.tsf");
+                    }
+                    Application.Run(new CreatePinForm());
+                }
+                else
+                {
+                    Application.Run(new LoginPinForm());
+                }
             }
-
-
         }
     }
 }
