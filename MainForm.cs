@@ -190,7 +190,6 @@ namespace TraySafe
                         string innerName = itemNamesDe[counter].First().ToString().ToLower() + itemNamesDe[counter].Substring(1);
                         string innerData = itemDataDe[counter];
 
-                        //tool.MouseHover += delegate (object senders, EventArgs a) { item_MouseHover(senders, a, tool, separator, innerName, innerData); };
                         tool.MouseDown += delegate (object senders, MouseEventArgs a) { item_MouseDown(senders, a, tool, separator, innerName, innerData); };
                         counter++;
                     }
